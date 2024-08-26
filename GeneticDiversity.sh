@@ -4,6 +4,9 @@
 ##get into the right conda environment where all software/tools required are loaded
 #conda active bioinformatics
 
+# Removing unwanted info from sequence files including all Blanks
+sed -e 's/-FeralHemp22Plate-.*//' -e 's/-Plate-.*//' -e '/^Blank/d' samples.txt > samples2.txt
+
 ##MAKE A COPY OF THE ORIGINAL VCF FILE FOR DOWNSTREAM ANALYSIS 
 #cp SNPs.mergedAll.vcf SNPs.mergedAll_copy.vcf
 
