@@ -1,26 +1,26 @@
 #!/bin/bash
-##------------------------------------------------------------------------------------------------------------------------------------------
-##script to manipulate and analyse VCF files from GBS for genetic diversity analysis
-##get into the right conda environment where all software/tools required are loaded
-#conda active bioinformatics
+##--------------------------------------------------------------------------------------------------------------------------------------------------
+##Script to manipulate and analyse VCF files from GBS for population structure and genetic diversity indices
+##Get into the right conda environment where all software/tools required are already loaded
+##Conda active bioinformatics
 
-# Removing unwanted info from sequence files including all Blanks
+# Removing unwanted sequencing info attached to file names e.g -plate-- including all blanks
 sed -e 's/-FeralHemp22Plate-.*//' -e 's/-Plate-.*//' -e '/^Blank/d' samples.txt > samples2.txt
 
-##MAKE A COPY OF THE ORIGINAL VCF FILE FOR DOWNSTREAM ANALYSIS 
-#cp SNPs.mergedAll.vcf SNPs.mergedAll_copy.vcf
+##----------MAKE A COPY OF THE ORIGINAL VCF FILE FOR DOWNSTREAM ANALYSIS----------------------------------------------------------------------------
+cp SNPs.mergedAll.vcf SNPs.mergedAll_copy.vcf
 
-##VIEW SAMPLE_IDS
-#cat SNPs.mergedAll.vcf | grep ^#CH | awk  '{gsub("\t","\n",$0); print;}' | less
-#bcftools query -l SNPs.mergedAll.vcf 
+##----------VIEW SAMPLE NAMES
+bcftools query -l SNPs.mergedAll.vcf 
 
-#BGZIP VCF FILE FOR EASE OF USE/OPERATION 
-#bgzip SNPs.mergedAll.vcf
-#bcftools index SNPs.mergedAll.vcf.gz
+#----------BGZIP VCF FILE FOR EASE OF USE/OPERATION 
+bgzip SNPs.mergedAll.vcf
+bcftools index SNPs.mergedAll.vcf.gz
 
-##---------VIEW CHR NUMBER AND EDIT TO NUMERIC ALSO SET CONTIGS TO NUMERIC FOR EASY DELETION  ---------------------------------------------
-#bcftools query -f '%CHROM\n'  SNPs.mergedAll.vcf.gz | sort | uniq > chromosomes.txt
-##correct header error if you get one like this [W::bcf_hdr_check_sanity] PL should be declared as Number=G 
+##----------VIEW CHR NUMBER AND EDIT TO NUMERIC ALSO SET CONTIGS TO NUMERIC FOR EASY DELETION  ---------------------------------------------------
+
+bcftools query -f '%CHROM\n'  SNPs.mergedAll.vcf.gz 
+#correct header error if you get one like this [W::bcf_hdr_check_sanity] PL should be declared as Number=G 
 ##Unzip gz file file, correct sanity and gzip again
 #bgzip -d SNPs.mergedAll.vcf.gz
 #sed 's/PL,Number=./PL,Number=G/g' SNPs.mergedAll.vcf > SNPs.merged.vcf
@@ -33,7 +33,8 @@ sed -e 's/-FeralHemp22Plate-.*//' -e 's/-Plate-.*//' -e '/^Blank/d' samples.txt 
 #bcftools view -t ^11 -o SNP.merged3.vcf.gz -O v SNP.merged2.vcf.gz
 #Check to see if unmapped contigs have been removed make ABOVE OUTPUT ONLY VCF no GZ extension
 #bcftools query -f '%CHROM\n' SNP.merged3.vcf.gz | sort | uniq
-##---------------------------------------------------------------------------------------------------------------------------------------------
+
+##-----------------------------------------------------------------------------------------------------------------------------------------------
 #Uncompress the gz.vcf file
 #bgzip -d SNP.merged3.vcf.gz
 ##make ped and map file from vcf file
@@ -68,7 +69,7 @@ sed -e 's/-FeralHemp22Plate-.*//' -e 's/-Plate-.*//' -e '/^Blank/d' samples.txt 
 #cut -c 1-2 checkfiles.txt > checkfiles2.txt
 
 ##MOVE TO R
-##PCA analysis ----------------------------------------------------------------------------------------------------------------------------------
+##PCA analysis -----------------------------------------------------------------------------------------------------------------------------------------
 ##PCA analysis STEP1 (LD thining)
 #plink --vcf SNPs.merged7.vcf --double-id --set-missing-var-ids @:# --indep-pairwise 50 2 0.2 --out SNPs.QCmerged7
 ##PCA analysis STEP 2
@@ -76,7 +77,7 @@ sed -e 's/-FeralHemp22Plate-.*//' -e 's/-Plate-.*//' -e '/^Blank/d' samples.txt 
 ##For PCA plot (move to R/Rstudio)
 
 
-##Admixture analysis-----------------------------------------------------------------------------------------------------------------------------
+##Admixture analysis-------------------------------------------------------------------------------------------------------------------------------------
 #for K in 1 2 3 4 5 6 7 8 9 10 11 12; \
 #do admixture --cv SNPs.merged7.bed $K | tee log${K}.out; done > admixresult.txt 2> admixresult.stderr 
 
